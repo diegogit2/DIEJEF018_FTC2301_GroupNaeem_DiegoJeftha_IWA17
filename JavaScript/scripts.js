@@ -38,10 +38,11 @@ const createData = () => {
     const startDay = current.getDay();  //Returns the day of the week
     const daysInMonth = getDaysInMonth(current);
 
-    const weeks = createArray(4);
+    const weeks = createArray(5);
     const days = createArray(7);
-    // let value = null;
+    // const value = null;
     const result = [];
+
 
 
     for (let weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
@@ -49,63 +50,68 @@ const createData = () => {
             week: weekIndex + 1,
             days: []
         }
-        return value;
+
 
         for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
             const day = weekIndex * 7 + dayIndex - startDay + 1;    //calculate the day number of current day on calender
             const isValid = day > 0 && day <= daysInMonth;
 
-            value.days.push( {
+            value.days.unshift({
                 dayOfWeek: dayIndex + 1,
-                value: isValid && day,
-            } )
-
+                value: isValid ? day : ""     // day if 'isValid' is true and null if false
+            })
+            
         }
-        
+        result.push(value);
+
     }
+    return result;
 }
 
 
 
-// const addCell = (existing, classString, value) => {
-//     const result = /* html */ `
-//         <td ${classString}>
-//             ${value}
-//         </td>
+const addCell = (existing, classString, value) => {
+    const result = /* html */ `
+        <td class=" ${classString}">
+            ${value}
+        </td>
 
-//         ${existing}
-//     `
-// }
+        ${existing}
+    `
+    return result;
+}
 
-// const createHtml = (data) => {
-//     let result = ''
+const createHtml = (data) => {
+    let result = '';
 
-//     for (week, days in data) {
-//         let inner = ""
-//         addCell(inner, 'table__cell table__cell_sidebar', 'Week ${week}')
-    
-//         for (dayOfWeek, value in days) {
-//             classString = table__cell
-// 						isToday = new Date() === value
-//             isWeekend = dayOfWeek = 1 && dayOfWeek == 7
-//             isAlternate = week / 2
+    for (let week of data) {
+        let inner = "";
+       
 
-//             let classString = 'table__cell'
+        for (let day of week.days) {
+            let classString = 'table__cell';
+            const isToday = new Date().getDate() === day.value;
+            const isWeekend = day.dayOfWeek === 1 || day.dayOfWeek === 7;
+            const isAlternate = week.week % 2 === 0;
 
-// 						if (isToday) classString = `${classString} table__cell_today`
-//             if (isWeekend) classString === '{classString} table__cell_weekend'
-//             if (isAlternate) classString === '{classString} table__cell_alternate'
-//             addCell(inner, classString, value)
-//         }
+            // let classString = 'table__cell'
 
-//         result = `<tr>${inner}</tr>`
-//     }
-// }
+            if (isToday) classString = `${classString} table__cell_today`;      // correct syntax for interpolation
+            if (isWeekend) classString = `${classString} table__cell_weekend`;    // correct syntax for interpolation
+            if (isAlternate) classString = `${classString} table__cell_alternate`;    // correct syntax for interpolation 
 
-// // Only edit above
+            inner = addCell(inner, classString, day.value)
+        }
+        inner =  addCell(inner, 'table__cell table__cell_sidebar', `Week ${week.week}`);
+        result += `<tr>${inner}</tr>`;
+    }
+    return result;
+}
 
-// const current = new Date()
-// document.querySelector('[data-title]').innerText = `${MONTHS[current.getMonth()]} ${current.getFullYear()}`
+// Only edit above
 
-// const data = createData()
-// document.querySelector('[data-content]').innerHTML = createHtml(data)
+const current = new Date()
+document.querySelector('[data-title]').innerText = `${MONTHS[current.getMonth()]} ${current.getFullYear()}`
+
+const data = createData()
+document.querySelector('[data-content]').innerHTML = createHtml(data)
